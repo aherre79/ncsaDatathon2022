@@ -1,0 +1,127 @@
+---
+title: "Datathon 2022"
+author: "Alejandro Herrera"
+date: "2022-09-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+library(reshape2)
+```
+
+```{r, include=FALSE}
+Cleaned_batch_jet_fuel <- read_csv("C:/Users/Ale/Desktop/Cleaned batch jet fuel.csv", 
+    col_types = cols(...1 = col_skip()))
+
+Cleaned_Diesel <- read_csv("C:/Users/Ale/Desktop/Cleaned Diesel.csv", 
+    col_types = cols(...1 = col_skip()))
+
+Cleaned_gasoline <- read_csv("C:/Users/Ale/Desktop/Cleaned gasoline.csv", 
+    col_types = cols(...1 = col_skip()))
+```
+
+```{r}
+Cleaned_Diesel = Cleaned_Diesel %>% 
+  rename(`Stock` = `Ending stock`)
+```
+
+Correlation of Jet Fuel variables
+```{r}
+cor(Cleaned_batch_jet_fuel[-1])
+```
+Correlation of Gasoline variables
+```{r}
+cor(Cleaned_gasoline[-1])
+```
+Correlation of Diesel variables
+```{r}
+cor(Cleaned_Diesel[-1])
+```
+```{r, echo=FALSE}
+melted_cor = Cleaned_gasoline %>% 
+  select(Gasoline, `Miles Driven`, `LWV Sales`, `Gasoline Price`, Stocks) %>% 
+cor() %>% 
+melt()
+
+ggplot(melted_cor, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "black") +
+  scale_fill_gradient2(low = "red", mid = "white", high = "green") +
+  coord_fixed()
+```
+
+```{r, echo = FALSE}
+#Cleaned_Diesel[-1] = Cleaned_Diesel[-1] %>% 
+  #rename(`Stock` = `Ending stock`)
+melted_cor = cor(Cleaned_Diesel[-1]) %>% 
+melt()
+
+ggplot(melted_cor, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "black") +
+  scale_fill_gradient2(low = "red", mid = "white", high = "green") +
+  coord_fixed()
+```
+
+```{r, echo=FALSE}
+melted_cor = cor(Cleaned_batch_jet_fuel[-1]) %>% 
+melt()
+
+ggplot(melted_cor, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "black") +
+  scale_fill_gradient2(low = "red", mid = "white", high = "green") +
+  coord_fixed()
+```
+
+```{r, include = FALSE}
+dfmelt = Cleaned_gasoline %>% 
+  rename(`Gasoline Demand` = Gasoline) %>% 
+  #select(Month, `Miles Driven`, Gasoline, `LWV Sales`, `Gasoline Price`, Stocks) %>% 
+  melt(id.vars = 'Month', variable.name = 'melted')
+dfmelt$Month = as.Date(ISOdate(mo = substr(dfmelt$Month, 1,2), year = substr(dfmelt$Month, 4,7), day = 1))
+
+dfmelt %>%
+  arrange(Month)
+```
+
+
+```{r, echo = FALSE}
+ggplot(dfmelt, mapping = aes(x = Month, y = value, group = 1)) +
+    geom_line(color = "blue") +
+  facet_wrap(~ melted, scales = "free_y", ncol = 1)
+```
+
+```{r, include=FALSE}
+dfmelt = Cleaned_Diesel %>% 
+  rename(`Distillate Demand` = Distillate) %>% 
+  #select(Month, `Miles Driven`, Gasoline, `LWV Sales`, `Gasoline Price`, Stocks) %>% 
+  melt(id.vars = 'Month', variable.name = 'melted')
+dfmelt$Month = as.Date(ISOdate(mo = substr(dfmelt$Month, 1,2), year = substr(dfmelt$Month, 4,7), day = 1))
+
+dfmelt %>%
+  arrange(Month)
+```
+
+```{r, echo = FALSE}
+ggplot(dfmelt, mapping = aes(x = Month, y = value, group = 1)) +
+    geom_line(color = "black") +
+  facet_wrap(~ melted, scales = "free_y", ncol = 1)
+```
+```{r, include = FALSE}
+dfmelt = Cleaned_batch_jet_fuel %>% 
+  rename(`Kerosene-Type Jet Fuel Demand` = `Jet Fuel`) %>% 
+  rename(`Revenue Aircraft Miles` = Revenue) %>% 
+  #select(Month, `Miles Driven`, Gasoline, `LWV Sales`, `Gasoline Price`, Stocks) %>% 
+  melt(id.vars = 'Month', variable.name = 'melted')
+dfmelt$Month = as.Date(ISOdate(mo = substr(dfmelt$Month, 1,2), year = substr(dfmelt$Month, 4,7), day = 1))
+
+dfmelt %>%
+  arrange(Month)
+```
+
+```{r, echo = FALSE}
+ggplot(dfmelt, mapping = aes(x = Month, y = value, group = 1)) +
+    geom_line(color = "red") +
+  facet_wrap(~ melted, scales = "free_y", ncol = 1)
+```
